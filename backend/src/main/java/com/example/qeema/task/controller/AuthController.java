@@ -7,17 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.qeema.task.entity.User;
 import com.example.qeema.task.service.JwtService;
 import com.example.qeema.task.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Authentication Controller", description = "APIs for user authentication")
 public class AuthController {
     
     @Autowired
@@ -31,6 +36,14 @@ public class AuthController {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @PostMapping("/register")
+    @Operation(summary = "Register a new user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "User registered successfully",
+                     content = @Content(mediaType = "application/json",
+                     schema = @Schema(implementation = Map.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid input data",
+                     content = @Content)
+    })
     public ResponseEntity<Map> register(@RequestBody Map<String,String> body){
         String username = body.get("username");
         String password = body.get("password");
@@ -47,6 +60,16 @@ public class AuthController {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @PostMapping("/login")
+    @Operation(summary = "Login a user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User logged in successfully",
+                     content = @Content(mediaType = "application/json",
+                     schema = @Schema(implementation = Map.class))),
+        @ApiResponse(responseCode = "404", description = "User not found",
+                     content = @Content),
+        @ApiResponse(responseCode = "401", description = "Invalid credentials",
+                     content = @Content)
+    })
     public ResponseEntity login(@RequestBody Map<String,String> body){
         String username = body.get("username");
         User user = this.userService.findByUsername(username);

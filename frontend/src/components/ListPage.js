@@ -11,7 +11,7 @@ const ListPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://backend:8081/orders?size=${limit}&page=${page}`, {
+        const response = await fetch(`http://backend:8080/orders?size=${limit}&page=${page}`, {
           headers: {
             'Authorization': `Bearer ${jwt}`
           }

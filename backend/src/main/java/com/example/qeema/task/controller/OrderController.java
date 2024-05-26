@@ -4,27 +4,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.qeema.task.dto.OrdersDto;
 import com.example.qeema.task.entity.Order;
 import com.example.qeema.task.service.OrderService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/orders")
+@Tag(name = "Order Controller", description = "APIs for managing orders")
 public class OrderController {
 
     @Autowired
     private OrderService orderService;
 
     @GetMapping
+    @Operation(summary = "Get orders")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Orders retrieved successfully",
+                     content = @Content(mediaType = "application/json",
+                     schema = @Schema(implementation = Page.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+                     content = @Content)
+    })
     public ResponseEntity<Page<Order>> getOrders(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size){
@@ -33,8 +43,16 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order createOrder(@Valid @RequestBody OrdersDto request) {
-        return orderService.createOrder(request);
+    @Operation(summary = "Create a new order")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Order created successfully",
+                     content = @Content(mediaType = "application/json",
+                     schema = @Schema(implementation = Order.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid request body",
+                     content = @Content)
+    })
+    public ResponseEntity<Order> createOrder(@Valid @RequestBody OrdersDto request) {
+        Order createdOrder = orderService.createOrder(request);
+        return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
     }
-
 }
